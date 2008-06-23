@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = "PyDrill",
-    version = "1.1",
+    version = "1.1.1",
     description='Standard teledrill python library',
     author='Kenneth Miller',
     author_email='kenneth.miller@teledrill.com',
