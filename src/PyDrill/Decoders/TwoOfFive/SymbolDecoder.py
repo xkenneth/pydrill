@@ -1,5 +1,6 @@
 import sys
 import math
+import pdb
 from PyDrill.Decoders import Decoder
 #from PyDrill.Simulation import LinearSimulator
 from PyDrill.Simulation import TwoOfFiveSimulator
@@ -287,6 +288,7 @@ class SymbolDecoder(Decoder.Decoder):
         start_min = self.wide_start - self.jitter
 
         wide_start_keys = self.work.keys(min=start_min,max=start_max)
+        
 
         if len(narrow_start_keys) > 0 and len(wide_start_keys) > 0:
             print "Reset, we have pulses for both a possible narrow and wide first pulse."
