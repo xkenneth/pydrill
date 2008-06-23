@@ -2,15 +2,16 @@ from PyDrill.Objects.Pulse import Pulse
 import ZODB.config
 from copy import copy
 import ZEO
+import pdb
 
 class Layer:
-    def __init__(self,host='localhost',port='8050',configFile=None):
+    def __init__(self,host='localhost',port='8050',configFile=None,file=None):
         """A layer for trafficing Teledrill data types in and out of a ZODB through a ZEO client.
         host - the hostname
         port - the port
         """
         from ZEO import ClientStorage
-        from ZODB import DB
+        from ZODB import DB,FileStorage
         import ZODB
 
         #error checking
@@ -19,11 +20,15 @@ class Layer:
         self.lf = '/tmp/mwdlf'
                 
         #create the storage
-        if self.configFile is not None:
-            self.storage = None
-            self.db = ZODB.config.databaseFromURL(self.configFile)
+        if file is None:
+            if self.configFile is not None:
+                self.storage = None
+                self.db = ZODB.config.databaseFromURL(self.configFile)
+            else:
+                self.storage = ClientStorage.ClientStorage(self.addr,wait=False) #try to connect, don't wait
+                self.db = DB(self.storage)
         else:
-            self.storage = ClientStorage.ClientStorage(self.addr,wait=False) #try to connect, don't wait
+            self.storage = FileStorage.FileStorage(file)
             self.db = DB(self.storage)
         
         self.conn = self.db.open()
@@ -181,42 +186,48 @@ class Layer:
 if __name__ == '__main__': #if we're in the main
     import unittest
     
-    #testing for connection to the test database
-    import ZEO
-    from ZEO import ClientStorage
-    from ZODB import DB
-    host = 'localhost'
-    port = 8059
-    addr = host,port
-    storage = ClientStorage.ClientStorage(addr,wait=False)
-    try:
-        db = DB(storage)
-    except ZEO.Exceptions.ClientDisconnected:
-        print "Cannot connect to the test Zeo Server, please make sure that it is running, and retry!"
-        raise SystemExit()
+    # #testing for connection to the test database
+#     import ZEO
+#     from ZEO import ClientStorage
+#     from ZODB import DB
+#     host = 'localhost'
+#     port = 8059
+#     addr = host,port
+#     storage = ClientStorage.ClientStorage(addr,wait=False)
+#     try:
+#         db = DB(storage)
+#     except ZEO.Exceptions.ClientDisconnected:
+#         print "Cannot connect to the test Zeo Server, please make sure that it is running, and retry!"
+#         raise SystemExit()
 
     #defining the test-cases
     class LayerTests(unittest.TestCase):
         def setUp(self):
 
-            testLayer = Layer(host,port)
-            testLayer.cleanSystem()
+            try: 
+                self.testLayer
+            except AttributeError:
+                
+                #testLayer = Layer(host,port)
+                testLayer = Layer(file='./test.fs')
+                testLayer.cleanSystem()
+                
+                self.testLayer = testLayer
+                
+                #create some test pulses
+                import mx.DateTime
 
-            self.testLayer = testLayer
-            
-            #create some test pulses
-            import mx.DateTime
+                self.pulses = [] #a list of pulses
 
-            self.pulses = [] #a list of pulses
-
-            t = mx.DateTime.now()
+                t = mx.DateTime.now()
             
-            for i in range(30):
-                self.pulses.append(Pulse(timeStamp=t+mx.DateTime.DateTimeDeltaFrom(i)))
+                for i in range(30):
+                    self.pulses.append(Pulse(timeStamp=t+mx.DateTime.DateTimeDeltaFrom(i)))
             
-            #insert the data into the database
-            self.testLayer.newData(self.pulses)
-            
+                #insert the data into the database
+                self.testLayer.newData(self.pulses)
+        def tearDown(self):
+            self.testLayer.disconnect()
 
         def testSetup(self):
             pass
