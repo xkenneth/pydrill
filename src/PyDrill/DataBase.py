@@ -1,11 +1,19 @@
 from PyDrill.Objects.Pulse import Pulse
+from PyDrill.Exceptions import PyDrillException
 import ZODB.config
 from copy import copy
 import ZEO
+
+### ZEO ###
+from ZEO.Exceptions import ClientDisconnected
 import pdb
 
+### EXC ###
+class LayerDisconnected(PyDrillException):
+    """The ZEO Client cannot contact the ZEO Server."""
+
 class Layer:
-    def __init__(self,host='localhost',port='8050',configFile=None,file=None):
+    def __init__(self,host='localhost',port='8050',configFile=None,file=None,retry=False):
         """A layer for trafficing Teledrill data types in and out of a ZODB through a ZEO client.
         host - the hostname
         port - the port
@@ -14,25 +22,52 @@ class Layer:
         from ZODB import DB,FileStorage
         import ZODB
 
-        #error checking
-        self.host, self.port, self.configFile = host, port, configFile
-        self.addr = self.host,self.port
-        self.lf = '/tmp/mwdlf'
+        if not retry:
+            #assign variables
+            self.host, self.port, self.configFile = host, port, configFile
+            self.addr = self.host,self.port
+            self.connected = False
+            #need an option to assign this
+            self.lf = '/tmp/mwdlf'
                 
         #create the storage
         if file is None:
             if self.configFile is not None:
+                #if config file
                 self.storage = None
                 self.db = ZODB.config.databaseFromURL(self.configFile)
+                self.connected = True
             else:
+                #if ZEO
                 self.storage = ClientStorage.ClientStorage(self.addr,wait=False) #try to connect, don't wait
-                self.db = DB(self.storage)
+                try:
+                    self.db = DB(self.storage)
+                    self.connected = True
+                except ClientDisconnected:
+                    pass
+
         else:
+            #if local file
             self.storage = FileStorage.FileStorage(file)
             self.db = DB(self.storage)
+            self.connected = True
         
-        self.conn = self.db.open()
-        self.root = self.conn.root()
+        if self.connected:
+            self.conn = self.db.open()
+            self.root = self.conn.root()
+
+### DECORATORS ###
+
+    def test_connection(func):
+        def inner_func(*args,**kwargs):
+            my_self = args[0]
+            if not my_self.connected:
+                my_self.__init__(my_self,retry=True)
+                if not my_self.connected:
+                    raise LayerDisconnected([my_self.host,my_self.port])
+            ret = func(*args,**kwargs)
+            return ret
+        return inner_func            
 
     def sync(func):
         def inner_func(*args,**kwargs):
@@ -45,13 +80,18 @@ class Layer:
 
     def disconnect(self):
         """Disconnect from the connection, only call this on a program close."""
-        self.conn.close()
+        
+        try:
+            self.conn.close()
+        except AttributeError:
+            return
         self.db.close()
         if self.storage is not None:
             self.storage.close()
 
         self.disconnected = False
         
+    @test_connection
     def cleanSystem(self):
         """Wipe out any data in the DataBase"""
         #get the transaction module
@@ -68,6 +108,7 @@ class Layer:
         #return the data
         return data
         
+    @test_connection
     @sync
     def newData(self,data,overWrite=False):
         """Insert new data into the database.
@@ -134,6 +175,7 @@ class Layer:
 
         transaction.commit() #commit the trans
 
+    @test_connection
     @sync
     def slice(self,key,begin=None,end=None,last=None,first=None,debug=False):
         """Return a section or all of the data for a particular "bin" in the database."""
@@ -201,15 +243,34 @@ if __name__ == '__main__': #if we're in the main
 #         raise SystemExit()
 
     #defining the test-cases
-    class LayerTests(unittest.TestCase):
+
+    class Disconnected(unittest.TestCase):
+        def setUp(self):
+            self.test_layers = [Layer('localhost',8050)]
+                          
+
+        def tearDown(self):
+            for layer in self.test_layers:
+                layer.disconnect()
+
+        def testZEONoServer(self):
+            for layer in self.test_layers:
+                self.failIf(layer.connected)
+            """Tests the behaviour of the Layer if initiated when no ZEO server is running."""
+            
+        
+    
+    class Connected(unittest.TestCase):
         def setUp(self):
 
             try: 
                 self.testLayer
             except AttributeError:
+
+                host = 'localhost'
+                port = 8050
                 
-                #testLayer = Layer(host,port)
-                testLayer = Layer(file='./test.fs')
+                testLayer = Layer(host,port)
                 testLayer.cleanSystem()
                 
                 self.testLayer = testLayer
@@ -226,6 +287,7 @@ if __name__ == '__main__': #if we're in the main
             
                 #insert the data into the database
                 self.testLayer.newData(self.pulses)
+
         def tearDown(self):
             self.testLayer.disconnect()
 
@@ -306,5 +368,25 @@ if __name__ == '__main__': #if we're in the main
             self.failUnlessEqual(self.pulses[0],newPulses[0])
             self.failUnlessEqual(self.pulses[-1],newPulses[-1])
 
+    class Local(Connected):
+        def setUp(self):
+            
+            testLayer = Layer(file='./test.fs')
+            testLayer.cleanSystem()
+            self.testLayer = testLayer
+
+            #create some test pulses
+            import mx.DateTime
+            
+            self.pulses = [] #a list of pulses
+            
+            t = mx.DateTime.now()
+            
+            for i in range(30):
+                self.pulses.append(Pulse(timeStamp=t+mx.DateTime.DateTimeDeltaFrom(i)))
+                
+            #insert the data into the database
+            self.testLayer.newData(self.pulses)
+            
     unittest.main()
  

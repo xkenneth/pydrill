@@ -4,7 +4,7 @@ from PyDrill import DataStructures
 import mx.DateTime
 import random
 from copy import deepcopy,copy
-
+import pdb
 import mx
 
 class TwoOfFiveSimulator(Decoder.Decoder):
@@ -19,7 +19,7 @@ class TwoOfFiveSimulator(Decoder.Decoder):
             if s.value is not None:
                 newSymbols.append(s)
             else:
-                newSymbols.append(self.symbols[math.randint(0,99)])
+                newSymbols.append(self.symbols[random.randint(0,99)])
                 
         bars = []
         for nS in newSymbols: #accumulate all of the bars
@@ -27,15 +27,36 @@ class TwoOfFiveSimulator(Decoder.Decoder):
 
         pulses = []
         #print bars
+        first_found = False
+        first = None
+
         for b in bars: #iterate through the bars, creating pulses where needed
             time = modulus
             if b.wide:
                 time = modulus*2.0
 
             if b.peak:
+                if first_found is False and first is not None:
+                    first_found = True
+                    first += mx.DateTime.DateTimeDeltaFrom(time/ratio)
+
+                if first is None:
+                    first_found = True
+                    first = mx.DateTime.DateTimeDeltaFrom(time/ratio)
+
+                #pdb.set_trace()
                 pulses.append(Pulse(timeStamp=timeStamp+mx.DateTime.DateTimeDeltaFrom(time/ratio)))
+
+            if first_found is False and first is not None:
+                first += mx.DateTime.DateTimeDeltaFrom(time)
+            if first is None:
+                first = mx.DateTime.DateTimeDeltaFrom(time)
             
+                
             timeStamp += mx.DateTime.DateTimeDeltaFrom(time)
+
+        for i in range(len(pulses)):
+            pulses[i].timeStamp = pulses[i].timeStamp - first
 
         return pulses,timeStamp
                 

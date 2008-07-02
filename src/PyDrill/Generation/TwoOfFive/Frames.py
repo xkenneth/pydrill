@@ -56,7 +56,7 @@ def generate():
                 lastData = Block(name=data,symbolLength=1)
                 
         newData.append(lastData)
-
+        
         frameObjects.append(SymbolFrame(identifier=save_id,blocks=newData))
 
         id += 1
