@@ -26,6 +26,9 @@ symbols = [symbol0,symbol1,symbol2,symbol3,symbol4,symbol5,symbol6,symbol7,symbo
 frameIdentifier1 = Symbol(value=-1,bars=[
         Bar(False),
         Bar(False),
+        Bar(True),
+        Bar(False),
+        Bar(False),
         Bar(False),
         Bar(False),
         Bar(True),
