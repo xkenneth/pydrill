@@ -9,6 +9,44 @@ class pydrill_object:
         
         raise Exception('No!')
 
+class tool_data(pydrill_object):
+	def __init__(self,name,value=None,timeStamp=None,slowData=None):
+		self.name = name
+		self.fileKey = name
+		self.value = value
+		self.timeStamp = timeStamp
+		self.slowData = slowData
+
+		
+	def __copy__(self):
+		return tool_data(self.name,value=self.value,timeStamp=self.timeStamp,slowData=self.slowData)
+
+	def __repr__(self):
+		t = "ToolData: "
+		try:
+			t+= "N: " + str(self.name) + " "
+		except AttributeError:
+			pass
+	
+		try: 
+			t+= "V: " + str(self.value) + " "
+		except AttributeError:
+			pass
+
+		try: 
+			t+= "T: " + str(self.timeStamp) + " "
+		except AttributeError:
+			pass
+
+		try:
+			t+= "SD: " + str(self.slowData) + " "
+		except AttributeError:
+			pass
+
+		t +=  "End TD"
+		
+		return t
+
 class pulse(pydrill_object):
 	"""A Pulse Object"""
 
@@ -805,7 +843,7 @@ class symbol_frame(pydrill_object):
                     #data[block.name] = ( data[block.name] * 100 ) + self.symbols[count].value
                     data[block.name].value = ( data[block.name].value * 100 ) + self.symbols[count].value
                 except KeyError:
-                    data[block.name] = ToolData(block.name,value=self.symbols[count].value,timeStamp=self.symbols[count].timeStamp)
+                    data[block.name] = tool_data(block.name,value=self.symbols[count].value,timeStamp=self.symbols[count].timeStamp)
                 count += 1
 
         #print data
@@ -826,43 +864,7 @@ class symbol_frame(pydrill_object):
 
         return count
 
-class tool_data(pydrill_object):
-	def __init__(self,name,value=None,timeStamp=None,slowData=None):
-		self.name = name
-		self.fileKey = name
-		self.value = value
-		self.timeStamp = timeStamp
-		self.slowData = slowData
 
-		
-	def __copy__(self):
-		return ToolData(self.name,value=self.value,timeStamp=self.timeStamp,slowData=self.slowData)
-
-	def __repr__(self):
-		t = "ToolData: "
-		try:
-			t+= "N: " + str(self.name) + " "
-		except AttributeError:
-			pass
-	
-		try: 
-			t+= "V: " + str(self.value) + " "
-		except AttributeError:
-			pass
-
-		try: 
-			t+= "T: " + str(self.timeStamp) + " "
-		except AttributeError:
-			pass
-
-		try:
-			t+= "SD: " + str(self.slowData) + " "
-		except AttributeError:
-			pass
-
-		t +=  "End TD"
-		
-		return t
 		
 
     
