@@ -46,10 +46,6 @@ class Decoder:
 	def addSymbols(self,symbols=None,identifiers=None,file=None):
 		self.symbols, self.identifiers = symbols,identifiers
 
-		if file is not None:
-			raise ValueError('Not Yet Implemented')
-
-		
 		if identifiers is not None:
 			numPeaks = []
 			for i in identifiers:
