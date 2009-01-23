@@ -9,43 +9,45 @@ class pydrill_object:
         
         raise Exception('No!')
 
+class tool_data: pass
+
 class tool_data(pydrill_object):
-	def __init__(self,name,value=None,timeStamp=None,slowData=None):
-		self.name = name
-		self.fileKey = name
-		self.value = value
-		self.timeStamp = timeStamp
-		self.slowData = slowData
+    def __init__(self,name,value=None,timeStamp=None,slowData=None):
+        self.name = name
+        self.fileKey = name
+        self.value = value
+        self.timeStamp = timeStamp
+        self.slowData = slowData
 
 		
-	def __copy__(self):
-		return tool_data(self.name,value=self.value,timeStamp=self.timeStamp,slowData=self.slowData)
+    def __copy__(self):
+        return tool_data(self.name,value=self.value,timeStamp=self.timeStamp,slowData=self.slowData)
 
-	def __repr__(self):
-		t = "ToolData: "
-		try:
-			t+= "N: " + str(self.name) + " "
-		except AttributeError:
-			pass
+    def __repr__(self):
+        t = "ToolData: "
+        try:
+            t+= "N: " + str(self.name) + " "
+        except AttributeError:
+            pass
 	
-		try: 
-			t+= "V: " + str(self.value) + " "
-		except AttributeError:
-			pass
-
-		try: 
-			t+= "T: " + str(self.timeStamp) + " "
-		except AttributeError:
-			pass
-
-		try:
-			t+= "SD: " + str(self.slowData) + " "
-		except AttributeError:
-			pass
-
-		t +=  "End TD"
+        try: 
+            t+= "V: " + str(self.value) + " "
+        except AttributeError:
+            pass
+        
+        try: 
+            t+= "T: " + str(self.timeStamp) + " "
+        except AttributeError:
+            pass
+        
+        try:
+            t+= "SD: " + str(self.slowData) + " "
+        except AttributeError:
+            pass
+        
+        t +=  "End TD"
 		
-		return t
+        return t
 
 class pulse(pydrill_object):
 	"""A Pulse Object"""
@@ -726,50 +728,50 @@ class block(pydrill_object):
 		return Block(chirpLengths=self.chirpLengths,name=self.name,timeStamp=self.timeStamp,symbolLength=self.symbolLength)
 
 	def decompose(self):
-		if self.name != None:
-			slowData=False
-			return tool_data(self.name,self.value,self.timeStamp,slowData)
-
+            if self.name != None:
+                slowData=False
+                return tool_data(self.name,self.value,self.timeStamp,slowData)
+            
 	def __repr__(self):
-		t = "Block "
+            t = "Block "
 		
-		if self.timeStamp!=None:
-			t += "time: "
-			t += str(self.timeStamp)
-			t += " "
+            if self.timeStamp!=None:
+                t += "time: "
+                t += str(self.timeStamp)
+                t += " "
 
-		if self.name!=None:
-			t += "Name: " + self.name + " "
-		else:
-			t += " Ignorable Block "
+            if self.name!=None:
+                t += "Name: " + self.name + " "
+            else:
+                t += " Ignorable Block "
 		
 		
 		
-		if self.value!=None:
-			t += "Value: " + str(self.value) + " "
+            if self.value!=None:
+                t += "Value: " + str(self.value) + " "
 			
-		if self.chirpLengths is not None and self.chirpLengths != []:
-			t += " Chirp Lengths " 
-			for i in self.chirpLengths:
-				t += " " + repr(i) + " "
+            if self.chirpLengths is not None and self.chirpLengths != []:
+                t += " Chirp Lengths " 
+                for i in self.chirpLengths:
+                    t += " " + repr(i) + " "
 
-		if self.symbolLength!=None:
-			t += "Symbol Length: " + str(self.symbolLength) + " "
+            if self.symbolLength!=None:
+                t += "Symbol Length: " + str(self.symbolLength) + " "
 		
-		t += " End Block"
+            t += " End Block"
 		
-		return t
+            return t
 
 	def sim(self):
-		chirps = []
-		for i in self.chirpLengths:
-			chirps.append(chirp(chirpLength=i))
+            chirps = []
+            for i in self.chirpLengths:
+                chirps.append(chirp(chirpLength=i))
 
-		if self.symbolLength is not None:
-			for s in range(self.symbolLength):
-				chirps.append(chirp())
+            if self.symbolLength is not None:
+                for s in range(self.symbolLength):
+                    chirps.append(chirp())
 
-		return chirps
+            return chirps
 
 class symbol_frame(pydrill_object):
     
@@ -835,7 +837,7 @@ class symbol_frame(pydrill_object):
     def decompose(self):
         """Decompose a completed frame into tooldata"""
         data = {}
-
+        
         count = 0
         for block in self.blocks:
             for i in range(len(block)):
@@ -848,12 +850,12 @@ class symbol_frame(pydrill_object):
 
         #print data
 
-        tool_data = []
+        found_tool_data = []
 
         for d in data:
-            tool_data.append(data[d])
+            found_tool_data.append(data[d])
 
-        return tool_data
+        return found_tool_data
 
 
     def __len__(self):
