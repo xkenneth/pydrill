@@ -7,27 +7,49 @@ from objects import symbol_frame
 from copy import copy
 import symbol_generation
 
-frame0 = ['toolstatus','toolstatus']
+# frame0 = ['toolstatus','toolstatus']
+# frame1 = ['azimuth','azimuth']
+# frame2 = ['inclination','inclination']
+# frame3 = ['gz','gz','gz']
+# frame4 = ['hz','hz','hz']
+# frame5 = ['gx','gx','gx','gy','gy','gy']
+# frame6 = ['hx','hx','hx','hy','hy','hy']
+# frame7 = ['temperature','temperature']
+# frame8 = ['pressure','pressure']
+# frame9 = ['toolface','toolface']
+# frame10 = ['gammaray','gammaray']
+# frame11 = ['gx','gx','gy','gy']
+# frame12 = ['hx','hx','hy','hy']
+# frame13 = ['toolface']
+# frame14 = ['gammaray']
+# frame15 = ['toolface','gammaray']
+
+frame0 = ['toolstatus']
 frame1 = ['azimuth','azimuth']
 frame2 = ['inclination','inclination']
-frame3 = ['gz','gz','gz']
-frame4 = ['hz','hz','hz']
-frame5 = ['gx','gx','gx','gy','gy','gy']
-frame6 = ['hx','hx','hx','hy','hy','hy']
-frame7 = ['temperature','temperature']
-frame8 = ['pressure','pressure']
-frame9 = ['toolface','toolface']
-frame10 = ['gammaray','gammaray']
-frame11 = ['gx','gx','gy','gy']
-frame12 = ['hx','hx','hy','hy']
-frame13 = ['toolface']
-frame14 = ['gammaray']
-frame15 = ['toolface','gammaray']
+frame3 = ['G','G','G','G']
+frame4 = ['H','H','H','H']
+frame5 = ['gz','gz','gz']
+frame6 = ['hz','hz','hz']
+frame7 = ['gx','gx','gx','gy','gy','gy']
+frame8 = ['hx','hx','hx','hy','hy','hy']
+frame9 = ['temperature','temperature']
+frame10 = ['pressure','pressure']
+frame11 = ['toolface','toolface']
+frame12 = ['gammaray','gammaray']
+frame13 = ['g','g']
+frame14 = ['h','h']
+frame15 = ['gx','gx','gy','gy']
+frame16 = ['hx','hx','hy','hy']
+frame17 = ['toolface']
+frame18 = ['gammaray']
+frame19 = ['toolface','gammaray']
 
 badFrame1 = ['baddata']
 badFrame2 = ['baddata1','baddata2']
 
-frames = [frame0,frame1,frame2,frame3,frame4,frame5,frame6,frame7,frame8,frame9,frame10,frame11,frame12,frame13,frame14,frame15] #frames take their ID from the order they're placed in here!!!
+frames = [frame0,frame1,frame2,frame3,frame4,frame5,frame6,frame7,frame8,frame9,frame10,frame11,frame12,frame13,frame14,frame15,frame16,frame17,frame18,frame19] #frames take their ID from the order they're placed in here!!!
+
 badFrames = [badFrame1,badFrame2]
 
 
@@ -121,15 +143,7 @@ def write(frames,path='./',fileName='frames.xml'):
 if __name__ == '__main__':
     
 
-    write(generate())
-        
-    
-
-
-                                  
-                
-                    
-            
+    print generate()
             
             
         
